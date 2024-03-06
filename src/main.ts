@@ -1,5 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 async function bootstrap() {
@@ -22,6 +23,7 @@ async function bootstrap() {
   };
 
   app.enableCors(corsOptions);
+  app.useGlobalPipes(new ValidationPipe());
 
   const port = parseInt(configService.get<string>("PORT", "4000"));
   await app.listen(port);
