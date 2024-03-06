@@ -5,14 +5,26 @@ import { HydratedDocument } from "mongoose";
 export type UserDocument = HydratedDocument<User>;
 
 // Définition du schéma
-@Schema()
+@Schema({ timestamps: true })
 // Export de la classe TS + propriétés TS
 export class User {
+  @Prop({ unique: true, required: true })
+  token: string;
+
   @Prop({ unique: true, required: true })
   email: string;
 
   @Prop({ required: true })
-  firstname: string;
+  password: string;
+
+  @Prop({ required: true })
+  username: string;
+
+  @Prop({ required: false })
+  avatar?: string;
+
+  @Prop({ required: false, default: false })
+  isConnected?: boolean;
 }
 
 // Création du modèle users dans mongoDB
