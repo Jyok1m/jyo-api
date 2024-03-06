@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { MongooseModule } from "@nestjs/mongoose";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { UserModule } from "./user/user.module";
 
-import * as mongoose from 'mongoose';
+import * as mongoose from "mongoose";
 
 @Module({
   imports: [
@@ -16,16 +16,14 @@ import * as mongoose from 'mongoose';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const uri = configService.get<string>('DB_CONNECTION_STRING');
+        const uri = configService.get<string>("DB_CONNECTION_STRING");
 
         if (!uri) {
-          throw new Error(
-            'DB_CONNECTION_STRING is not defined in the environment variables.',
-          );
+          throw new Error("DB_CONNECTION_STRING is not defined in the environment variables.");
         }
 
         // Logging the success message here
-        console.log('Successfully connected to the Jyogames API DB 🥳');
+        console.log("Successfully connected to the Jyogames API DB 🥳");
 
         // Return the MongooseModuleFactoryOptions object with the URI
         return {
@@ -35,7 +33,7 @@ import * as mongoose from 'mongoose';
               // Connection is managed by MongooseModule
               return mongoose.createConnection(uri, { connectTimeoutMS: 2000 });
             } catch (e) {
-              console.error('Error connecting to the DB:', e.message);
+              console.error("Error connecting to the DB:", e.message);
               throw e; // Propagate the error
             }
           },
