@@ -9,7 +9,7 @@ export type UserDocument = HydratedDocument<User>;
 // Export de la classe TS + propriétés TS
 export class User {
   @Prop({ unique: true, required: true })
-  token: string;
+  uuid: string;
 
   @Prop({ unique: true, required: true })
   email: string;
@@ -22,6 +22,9 @@ export class User {
 
   @Prop({ required: false })
   avatar?: string;
+
+  @Prop({ required: false })
+  webToken?: string;
 
   @Prop({ required: false, default: false })
   isConnected?: boolean;
