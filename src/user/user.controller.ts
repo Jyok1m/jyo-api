@@ -18,8 +18,8 @@ export class UserController {
     return this.userService.createUser(req);
   }
 
-  // Login
-  @Post("/login")
+  // Signin
+  @Post("/signin")
   async loginUser(@Body() req: LoginUserDto): Promise<Login> {
     return this.userService.loginUser(req);
   }
