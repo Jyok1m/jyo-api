@@ -4,7 +4,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UserModule } from "./user/user.module";
-import { JwtModule } from './jwt/jwt.module';
+import { JwtModule } from "./jwt/jwt.module";
 
 import * as mongoose from "mongoose";
 
@@ -24,7 +24,7 @@ import * as mongoose from "mongoose";
         }
 
         // Logging the success message here
-        console.log("Successfully connected to the Jyogames API DB 🥳");
+        console.log("Successfully connected to the Jyo API Database 🥳");
 
         // Return the MongooseModuleFactoryOptions object with the URI
         return {
