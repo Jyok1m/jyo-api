@@ -14,9 +14,8 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { LoginUserDto } from "./dto/login-user.dto";
 
 import { User } from "schemas/user.schema";
-import { Login } from "./interfaces/Login.interface";
+import { AuthResult } from "./interfaces/AuthResult.interface";
 
-import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcrypt";
 
 @Injectable()
@@ -26,77 +25,48 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
 
-  // Méthode pour créer un utilisateur
-  async createUser(req: CreateUserDto): Promise<User> {
+  async createUser(req: CreateUserDto): Promise<AuthResult> {
     try {
-      // Recherche si le user existe
-      const existingUser = await this.userModel.findOne({ email: req.email });
-      if (existingUser) throw new ConflictException("User already exists.");
+      const userExists = await this.userModel.findOne({ email: req.email });
+      if (userExists) throw new ConflictException("User already exists.");
 
-      // Generate UUID
-      const newUserUid: string = uuidv4();
+      const hash = await bcrypt.hash(req.password, 10);
+      const userObj = new this.userModel({ ...req, password: hash });
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(req.password, 10);
+      const genResult = this.jwtService.generate(userObj._id.toString());
+      if (!(genResult.success && genResult.token)) throw new InternalServerErrorException(genResult.error);
 
-      // Construct object
-      const newUser: User = { ...req, uuid: newUserUid, password: hashedPassword };
+      userObj.token = genResult.token;
+      const savedUser = await userObj.save();
 
-      // Création du user
-      const createdUser = new this.userModel(newUser);
-      return createdUser.save();
-    } catch (e) {
-      throw e;
+      return { success: true, token: savedUser.token };
+    } catch (error) {
+      throw error;
     }
   }
 
-  // Méthode pour login un utilisateur
-  async loginUser(req: LoginUserDto): Promise<Login> {
+  async loginUser(req: LoginUserDto): Promise<AuthResult> {
     try {
-      // Recherche si le user existe
-      const user = await this.userModel
+      const existingUser = await this.userModel
         .findOne({ $or: [{ email: req.identifier }, { username: req.identifier }] })
-        .select("webToken password");
-      if (!user) throw new NotFoundException("User not found.");
+        .select("token password");
+      if (!existingUser) throw new NotFoundException("User not found.");
 
-      // Vérfication du mot de passe
-      const isMatch = await bcrypt.compare(req.password, user.password);
-      if (!isMatch) throw new BadRequestException("Incorrect password.");
+      const isPasswordMatch = await bcrypt.compare(req.password, existingUser.password);
+      if (!isPasswordMatch) throw new BadRequestException("Incorrect password.");
 
-      // Token handling
-      let isTokenValid = false;
-      let token: string = "";
+      const checkResult = this.jwtService.verify(existingUser.token);
 
-      // If a user has webToken, verify it.
-      if (user.webToken) {
-        const checkResult = this.jwtService.verify(user.webToken);
-        if (checkResult.success) {
-          isTokenValid = true;
-          token = user.webToken;
-        } else {
-          const genResult = this.jwtService.generate(user._id.toString());
-          if (genResult.success && genResult.token) {
-            isTokenValid = true;
-            token = genResult.token;
-          } else {
-            throw new InternalServerErrorException(genResult.error);
-          }
-        }
+      if (checkResult.success) {
+        return { success: true, token: existingUser.token };
+      } else {
+        const genResult = this.jwtService.generate(existingUser._id.toString());
+        if (!(genResult.success && genResult.token)) throw new InternalServerErrorException(genResult.error);
+
+        await this.userModel.findByIdAndUpdate(existingUser._id.toString(), { token: genResult.token });
+
+        return { success: true, token: genResult.token };
       }
-
-      if (!isTokenValid) {
-        const genResult = this.jwtService.generate(user._id.toString());
-        if (genResult.success && genResult.token) {
-          token = genResult.token;
-        } else {
-          throw new InternalServerErrorException(genResult.error);
-        }
-      }
-
-      // Save token
-      await this.userModel.findByIdAndUpdate(user._id.toString(), { webToken: token });
-
-      return { success: true, token };
     } catch (e) {
       throw e;
     }

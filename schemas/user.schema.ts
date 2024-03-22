@@ -8,8 +8,8 @@ export type UserDocument = HydratedDocument<User>;
 @Schema({ timestamps: true })
 // Export de la classe TS + propriétés TS
 export class User {
-  @Prop({ unique: true, required: true })
-  uuid: string;
+  @Prop({ required: true })
+  username: string;
 
   @Prop({ unique: true, required: true })
   email: string;
@@ -17,17 +17,8 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ required: true })
-  username: string;
-
   @Prop({ required: false })
-  avatar?: string;
-
-  @Prop({ required: false })
-  webToken?: string;
-
-  @Prop({ required: false, default: false })
-  isConnected?: boolean;
+  token: string;
 }
 
 // Création du modèle users dans mongoDB
