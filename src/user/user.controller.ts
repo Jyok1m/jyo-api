@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from "@nestjs/common";
 import { UserService } from "./user.service";
 
-import { Signout } from "./interfaces/Signout.interface";
+import { SignOutResult } from "./interfaces/SignOutResult.interface";
 import { AuthResult } from "./interfaces/AuthResult.interface";
 
 import { SignUpDto } from "./dto/SignUp.dto";
@@ -27,7 +27,7 @@ export class UserController {
 
   // Signout
   @Post("/sign-out")
-  async signout(@Body() req: SignOutDto): Promise<Signout> {
+  async signout(@Body() req: SignOutDto): Promise<SignOutResult> {
     return { success: true, message: "User signed-out successfully." };
   }
 }

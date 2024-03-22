@@ -1,4 +1,4 @@
-export interface Signout {
+export interface SignOutResult {
   success: boolean;
   message: string;
 }
