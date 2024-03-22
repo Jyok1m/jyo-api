@@ -15,19 +15,19 @@ export class UserController {
 
   // Sign-up
   @Post("/sign-up")
-  async createUser(@Body() req: SignUpDto): Promise<AuthResult> {
-    return this.userService.createUser(req);
+  async signUp(@Body() req: SignUpDto): Promise<AuthResult> {
+    return this.userService.signUp(req);
   }
 
   // Signin
   @Post("/sign-in")
-  async loginUser(@Body() req: SignInDto): Promise<AuthResult> {
-    return this.userService.loginUser(req);
+  async signIn(@Body() req: SignInDto): Promise<AuthResult> {
+    return this.userService.signIn(req);
   }
 
   // Signout
   @Post("/sign-out")
-  async signout(@Body() req: SignOutDto): Promise<SignOutResult> {
-    return { success: true, message: "User signed-out successfully." };
+  async signOut(@Body() req: SignOutDto): Promise<SignOutResult> {
+    return this.userService.signOut(req);
   }
 }

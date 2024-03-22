@@ -16,6 +16,7 @@ import { SignOutDto } from "./dto/SignOut.dto";
 
 import { User } from "schemas/user.schema";
 import { AuthResult } from "./interfaces/AuthResult.interface";
+import { SignOutResult } from "./interfaces/SignOutResult.interface";
 
 import * as bcrypt from "bcrypt";
 
@@ -26,7 +27,7 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(req: SignUpDto): Promise<AuthResult> {
+  async signUp(req: SignUpDto): Promise<AuthResult> {
     try {
       const userExists = await this.userModel.findOne({ email: req.email });
       if (userExists) throw new ConflictException("User already exists.");
@@ -38,15 +39,15 @@ export class UserService {
       if (!(genResult.success && genResult.token)) throw new InternalServerErrorException(genResult.error);
 
       userObj.token = genResult.token;
-      const savedUser = await userObj.save();
+      await userObj.save();
 
-      return { success: true, token: savedUser.token };
+      return { success: true, token: genResult.token };
     } catch (error) {
       throw error;
     }
   }
 
-  async loginUser(req: SignInDto): Promise<AuthResult> {
+  async signIn(req: SignInDto): Promise<AuthResult> {
     try {
       const existingUser = await this.userModel
         .findOne({ $or: [{ email: req.identifier }, { username: req.identifier }] })
@@ -56,18 +57,34 @@ export class UserService {
       const isPasswordMatch = await bcrypt.compare(req.password, existingUser.password);
       if (!isPasswordMatch) throw new BadRequestException("Incorrect password.");
 
-      const checkResult = this.jwtService.verify(existingUser.token);
+      let token = "";
 
-      if (checkResult.success) {
-        return { success: true, token: existingUser.token };
+      if (existingUser.token && this.jwtService.verify(existingUser.token).success) {
+        token = existingUser.token;
       } else {
         const genResult = this.jwtService.generate(existingUser._id.toString());
         if (!(genResult.success && genResult.token)) throw new InternalServerErrorException(genResult.error);
-
         await this.userModel.findByIdAndUpdate(existingUser._id.toString(), { token: genResult.token });
-
-        return { success: true, token: genResult.token };
+        token = genResult.token;
       }
+
+      return { success: true, token };
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async signOut(req: SignOutDto): Promise<SignOutResult> {
+    try {
+      const existingUser = await this.userModel.findOne({ token: req.token });
+      if (!existingUser) throw new NotFoundException("User not found or already signed-out.");
+
+      const tokenCheck = this.jwtService.verify(req.token);
+      if (!tokenCheck.success) throw new BadRequestException("Invalid token.");
+
+      await this.userModel.findByIdAndUpdate(existingUser._id.toString(), { token: "" });
+
+      return { success: true, message: "User signed-out successfully." };
     } catch (e) {
       throw e;
     }

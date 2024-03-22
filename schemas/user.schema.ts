@@ -17,7 +17,7 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ required: false })
+  @Prop({ required: true })
   token: string;
 }
 
