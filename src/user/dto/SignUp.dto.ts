@@ -1,6 +1,6 @@
 import { IsEmail, IsString, Length, MinLength, Matches } from "class-validator";
 
-export class CreateUserDto {
+export class SignUpDto {
   @IsString()
   @Length(1, 50) // This sets a minimum length of 1 and a maximum of 50 characters
   username: string;

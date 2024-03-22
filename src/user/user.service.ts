@@ -10,8 +10,9 @@ import { InjectModel } from "@nestjs/mongoose";
 
 import { JwtService } from "src/jwt/jwt.service";
 
-import { CreateUserDto } from "./dto/create-user.dto";
-import { LoginUserDto } from "./dto/login-user.dto";
+import { SignUpDto } from "./dto/SignUp.dto";
+import { SignInDto } from "./dto/SignIn.dto";
+import { SignOutDto } from "./dto/SignOut.dto";
 
 import { User } from "schemas/user.schema";
 import { AuthResult } from "./interfaces/AuthResult.interface";
@@ -25,7 +26,7 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(req: CreateUserDto): Promise<AuthResult> {
+  async createUser(req: SignUpDto): Promise<AuthResult> {
     try {
       const userExists = await this.userModel.findOne({ email: req.email });
       if (userExists) throw new ConflictException("User already exists.");
@@ -45,7 +46,7 @@ export class UserService {
     }
   }
 
-  async loginUser(req: LoginUserDto): Promise<AuthResult> {
+  async loginUser(req: SignInDto): Promise<AuthResult> {
     try {
       const existingUser = await this.userModel
         .findOne({ $or: [{ email: req.identifier }, { username: req.identifier }] })

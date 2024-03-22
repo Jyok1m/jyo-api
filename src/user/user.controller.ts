@@ -4,9 +4,9 @@ import { UserService } from "./user.service";
 import { Signout } from "./interfaces/Signout.interface";
 import { AuthResult } from "./interfaces/AuthResult.interface";
 
-import { CreateUserDto } from "./dto/create-user.dto";
-import { LoginUserDto } from "./dto/login-user.dto";
-import { SignoutUserDto } from "./dto/signout-user.dto";
+import { SignUpDto } from "./dto/SignUp.dto";
+import { SignInDto } from "./dto/SignIn.dto";
+import { SignOutDto } from "./dto/SignOut.dto";
 
 @Controller("user")
 export class UserController {
@@ -15,19 +15,19 @@ export class UserController {
 
   // Sign-up
   @Post("/sign-up")
-  async createUser(@Body() req: CreateUserDto): Promise<AuthResult> {
+  async createUser(@Body() req: SignUpDto): Promise<AuthResult> {
     return this.userService.createUser(req);
   }
 
   // Signin
   @Post("/sign-in")
-  async loginUser(@Body() req: LoginUserDto): Promise<AuthResult> {
+  async loginUser(@Body() req: SignInDto): Promise<AuthResult> {
     return this.userService.loginUser(req);
   }
 
   // Signout
   @Post("/sign-out")
-  async signout(@Body() req: SignoutUserDto): Promise<Signout> {
+  async signout(@Body() req: SignOutDto): Promise<Signout> {
     return { success: true, message: "User signed-out successfully." };
   }
 }
